@@ -1,4 +1,4 @@
-import main_definitions as md
+import main_definitions as md, pickle
 from functools import wraps
 
 def parse_input_input_error(func):
@@ -133,8 +133,19 @@ def show_upcoming_birthdays(contacts):
     up_birthdays_list = contacts.get_upcoming_birthdays() if len(contacts.get_upcoming_birthdays()) > 0 else ["Upcoming birthdays list is empty."]
     return up_birthdays_list
 
+def save_data(contacts: md.AddressBook, filename="contacts.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(contacts, f)
+
+def load_data(filename="contacts.pkl"):
+    try:
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return md.AddressBook()  # if contactcts.pkl not found
+
 def main():
-    contacts = md.AddressBook()
+    contacts = load_data()
     cmd_dict = {"close": "exit bot", "exit": "exit bot", "hello": "greeting - non functional command", 
                 "add": "adding new contact >>> add [username] [phone (10 dig. number)]", 
                 "change": "update contact if exists >>> change [username] [old_phone (10 dig. number)] [new_phone (10 dig. number)]", 
@@ -146,6 +157,7 @@ def main():
         user_input = input("Enter a command: ")
         command, *args = parse_input(user_input, cmd_dict)
         if command in ["close", "exit"]:
+            save_data(contacts)
             print("Good bye!")
             break
         elif command == "hello":
